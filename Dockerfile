@@ -1,29 +1,32 @@
-FROM node:20-slim AS builder
+# Use node:20 (full image, includes Python + build tools for native addons like better-sqlite3)
+FROM node:20
 
 WORKDIR /app
 
-# Copy root package.json
-COPY package.json ./
+# Copy and install server dependencies
+COPY server/package.json server/package-lock.json* ./server/
+RUN cd server && npm install
 
-# Copy client and server directories
+# Copy and build client
+COPY client/package.json client/package-lock.json* ./client/
+RUN cd client && npm install
 COPY client/ ./client/
+RUN cd client && npm run build
+
+# Copy remaining server source
 COPY server/ ./server/
 
-# Install dependencies and build the app
-RUN npm run install:all && npm run build
+# Copy built client into a location the server can serve
+RUN cp -r client/dist server/dist
 
-# Final production image
-FROM node:20-slim
-
-WORKDIR /app
-
-# Copy built artifacts from the builder stage
-COPY --from=builder /app /app
-
+# Environment
 ENV NODE_ENV=production
 ENV PORT=8080
+ENV DB_PATH=/data/data.db
+
+RUN mkdir -p /data
 
 EXPOSE 8080
 
-# The root package.json now handles cd into server and running npm start
-CMD ["npm", "start"]
+WORKDIR /app/server
+CMD ["node", "server.js"]

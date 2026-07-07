@@ -90,7 +90,11 @@ app.post('/api/summarize-complaints', async (req, res) => {
 
 // ─── Production: serve built React app ────────────────────────────────────────
 if (IS_PROD) {
-  const clientBuild = path.join(__dirname, '..', 'client', 'dist');
+  const fs = require('fs');
+  // Docker puts client build at server/dist; Render puts it at ../client/dist
+  const dockerBuild = path.join(__dirname, 'dist');
+  const renderBuild = path.join(__dirname, '..', 'client', 'dist');
+  const clientBuild = fs.existsSync(dockerBuild) ? dockerBuild : renderBuild;
   app.use(express.static(clientBuild));
   app.get('*', (req, res) => {
     if (!req.path.startsWith('/api')) {
@@ -98,6 +102,7 @@ if (IS_PROD) {
     }
   });
 }
+
 
 // ─── Error handler ────────────────────────────────────────────────────────────
 app.use((err, req, res, next) => {
