@@ -3,7 +3,8 @@ const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 
 // ─── Open / create database file ─────────────────────────────────────────────
-const db = new Database(path.join(__dirname, 'data.db'));
+const dbPath = process.env.DB_PATH || path.join(__dirname, 'data.db');
+const db = new Database(dbPath);
 db.pragma('journal_mode = WAL');
 db.pragma('foreign_keys = ON');
 
