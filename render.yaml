@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: peoples-priorities
+    env: node
+    buildCommand: npm run install:all && npm run build
+    startCommand: npm start
+    disk:
+      name: sqlite-data
+      mountPath: /data
+      sizeGB: 1
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_PATH
+        value: /data/data.db
+      - key: ADMIN_TOKEN
+        value: admin123
+      - key: TINYFISH_API_KEY
+        sync: false
