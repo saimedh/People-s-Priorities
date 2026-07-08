@@ -15,5 +15,13 @@ services:
         value: /data/data.db
       - key: ADMIN_TOKEN
         value: admin123
+      - key: PORT
+        value: 10000
+      - key: GEMINI_API_KEY
+        sync: false
       - key: TINYFISH_API_KEY
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CLIENT_URL
         sync: false

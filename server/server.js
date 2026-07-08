@@ -20,7 +20,22 @@ const PORT = process.env.PORT || 5000;
 const IS_PROD = process.env.NODE_ENV === 'production';
 
 // ─── Middleware ───────────────────────────────────────────────────────────────
-app.use(cors());
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, Postman)
+    if (!origin) return callback(null, true);
+    const allowed = [
+      /^http:\/\/localhost:\d+$/,
+      /\.vercel\.app$/,
+      process.env.CLIENT_URL,
+    ].filter(Boolean);
+    const ok = allowed.some(pattern =>
+      pattern instanceof RegExp ? pattern.test(origin) : pattern === origin
+    );
+    callback(ok ? null : new Error('Not allowed by CORS'), ok);
+  },
+  credentials: true,
+}));
 app.use(express.json({ limit: '10mb' }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.urlencoded({ extended: true }));
